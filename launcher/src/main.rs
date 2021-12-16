@@ -9,7 +9,7 @@ use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use std::thread;
 
-const APP_ID: &str = "za.co.grindrodbank.pgmodeler-x11";
+const APP_ID: &str = "za.co.mvniekerk.pgmodeler-x11";
 
 fn show_error(error: &str, application: &gtk::Application) {
     let error_message = include_str!("error_message.glade");
@@ -224,7 +224,7 @@ fn run_pgmodeler(
     let home_volume = format!("--volume=/home/{}:/home/{}", user_name, user_name);
     let home_volume = home_volume.as_str();
 
-    let image_name = format!("grindrodbank/pgmodeler-x11:{}", pgmodeler_version);
+    let image_name = format!("mvniekerk/pgmodeler-docker-x11:{}", pgmodeler_version);
     let image_name = image_name.as_str();
 
     let args = &[
@@ -316,7 +316,7 @@ fn run_pgmodeler(
     let home_volume = format!("--volume=/Users/{}:/home/{}", user_name, user_name);
     let home_volume = home_volume.as_str();
 
-    let image_name = format!("grindrodbank/pgmodeler-x11:{}", pgmodeler_version);
+    let image_name = format!("mvniekerk/pgmodeler-docker-x11:{}", pgmodeler_version);
     let image_name = image_name.as_str();
 
     let args = &[

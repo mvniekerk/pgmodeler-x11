@@ -286,7 +286,7 @@ fi
 make distclean  >> $LOG 2>&1
 
 echo "Running qmake..."
-$QMAKE_ROOT/$QMAKE_CMD $QMAKE_ARGS  >> $LOG 2>&1
+$QMAKE_ROOT/$QMAKE_CMD $QMAKE_ARGS 
 
 if [ $? -ne 0 ]; then
   echo
@@ -296,7 +296,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Compiling code..."
-make -j8  >> $LOG 2>&1
+make -j2
 
 if [ $? -ne 0 ]; then
   echo
