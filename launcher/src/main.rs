@@ -1,12 +1,12 @@
-extern crate gtk;
 extern crate gio;
+extern crate gtk;
 
 use gio::prelude::*;
 use gtk::prelude::*;
 use std::env::args;
 use std::env::var;
+use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
-use std::io::{BufReader, BufRead};
 use std::thread;
 
 const APP_ID: &str = "za.co.grindrodbank.pgmodeler-x11";
@@ -27,15 +27,12 @@ fn show_error(error: &str, application: &gtk::Application) {
 
 #[cfg(target_os = "linux")]
 fn x11_running(application: &gtk::Application, _ran_already: bool) -> Result<String, ()> {
-    let display_output = Command::new("sh")
-        .arg("-c")
-        .arg("echo $DISPLAY")
-        .output();
+    let display_output = Command::new("sh").arg("-c").arg("echo $DISPLAY").output();
     match display_output {
         Err(_e) => {
             show_error("Could not get $DISPLAY variable", application);
             Err(())
-        },
+        }
         Ok(output) => {
             let display = String::from_utf8(output.stdout).expect("Could not parse output");
             let display = display.as_str().trim();
@@ -54,10 +51,7 @@ fn get_ip(application: &gtk::Application) -> Result<String, ()> {
         .map(|x| {
             let nic = format!("en{}", x);
             let nic = nic.as_str();
-            let ip = Command::new("ipconfig")
-                .arg("getifaddr")
-                .arg(nic)
-                .output();
+            let ip = Command::new("ipconfig").arg("getifaddr").arg(nic).output();
             ip
         })
         .filter(|ip| ip.is_ok())
@@ -87,7 +81,8 @@ fn x11_running(application: &gtk::Application, ran_already: bool) -> Result<Stri
         return Err(());
     }
     let xquartz_running = xquartz_running.unwrap();
-    let xquartz_running = String::from_utf8(xquartz_running.stdout).expect("Could not parse output");
+    let xquartz_running =
+        String::from_utf8(xquartz_running.stdout).expect("Could not parse output");
 
     // If it is not running
     if xquartz_running.len() == 0 {
@@ -96,10 +91,7 @@ fn x11_running(application: &gtk::Application, ran_already: bool) -> Result<Stri
             Err(())
         } else {
             println!("XQuartz is not running, start it");
-            let launch_xquartz = Command::new("open")
-                .arg("-a")
-                .arg("XQuartz")
-                .output();
+            let launch_xquartz = Command::new("open").arg("-a").arg("XQuartz").output();
 
             if launch_xquartz.is_err() {
                 show_error("Could not start XQuartz", application);
@@ -150,22 +142,22 @@ fn docker_version() -> Result<String, ()> {
     match docker_output {
         Err(e) => Err(()),
         Ok(output) => {
-            let docker_version = String::from_utf8(output.stdout).expect("Could not parse output")
-                .as_str().trim();
+            let docker_version = String::from_utf8(output.stdout)
+                .expect("Could not parse output")
+                .as_str()
+                .trim();
             if (docker_version.len() == 0) {
                 Err(())
             } else {
                 Ok(display.to_string())
             }
         }
-    }}
+    }
+}
 
 #[cfg(any(target_os = "macos", target_os = "linux"))]
 fn user_id() -> Result<String, ()> {
-    let id_output = Command::new("sh")
-        .arg("-c")
-        .arg("id -u")
-        .output();
+    let id_output = Command::new("sh").arg("-c").arg("id -u").output();
     match id_output {
         Err(_e) => Err(()),
         Ok(output) => {
@@ -182,10 +174,7 @@ fn user_id() -> Result<String, ()> {
 
 #[cfg(any(target_os = "macos", target_os = "linux"))]
 fn user_name() -> Result<String, ()> {
-    let user_output = Command::new("sh")
-        .arg("-c")
-        .arg("echo $USER")
-        .output();
+    let user_output = Command::new("sh").arg("-c").arg("echo $USER").output();
     match user_output {
         Err(_e) => Err(()),
         Ok(output) => {
@@ -201,20 +190,32 @@ fn user_name() -> Result<String, ()> {
 }
 
 #[cfg(target_os = "linux")]
-fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, application: &gtk::Application) {
+fn run_pgmodeler(
+    display_variable: String,
+    user_id: String,
+    user_name: String,
+    application: &gtk::Application,
+) {
     let pgmodeler_version = match var("PGMODELER_VERSION") {
         Ok(ver) => ver.to_string(),
-        Err(_e) => "v0.9.4-beta1".to_string()
+        Err(_e) => "v0.9.4-beta1".to_string(),
     };
-    let pgmodeler_conf_dir = format!("/home/{}/.pgmodeler-docker-x11/{}", user_name, pgmodeler_version);
+    let pgmodeler_conf_dir = format!(
+        "/home/{}/.pgmodeler-docker-x11/{}",
+        user_name, pgmodeler_version
+    );
     let pgmodeler_conf_dir = pgmodeler_conf_dir.as_str();
 
     Command::new("mkdir")
         .arg("-p")
         .arg(pgmodeler_conf_dir)
-        .output().unwrap();
+        .output()
+        .unwrap();
 
-    let pgmodeler_conf = format!("--volume={}:/home/{}/.pgmodeler", pgmodeler_conf_dir, user_name);
+    let pgmodeler_conf = format!(
+        "--volume={}:/home/{}/.pgmodeler",
+        pgmodeler_conf_dir, user_name
+    );
     let pgmodeler_conf = pgmodeler_conf.as_str();
 
     let display_variable = format!("DISPLAY=unix{}", display_variable);
@@ -229,12 +230,19 @@ fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, a
     let args = &[
         "run",
         "--rm",
-        "--user", user_id.as_str(),
-        "-e", display_variable, home_volume, "--volume=/etc/group:/etc/group:ro",
-        "--volume=/etc/passwd:/etc/passwd:ro", "--volume=/etc/shadow:/etc/shadow:ro",
-        "--volume=/etc/sudoers.d:/etc/sudoers.d:ro", "--volume=/tmp/.X11-unix:/tmp/.X11-unix",
+        "--user",
+        user_id.as_str(),
+        "-e",
+        display_variable,
+        home_volume,
+        "--volume=/etc/group:/etc/group:ro",
+        "--volume=/etc/passwd:/etc/passwd:ro",
+        "--volume=/etc/shadow:/etc/shadow:ro",
+        "--volume=/etc/sudoers.d:/etc/sudoers.d:ro",
+        "--volume=/tmp/.X11-unix:/tmp/.X11-unix",
         pgmodeler_conf,
-        image_name];
+        image_name,
+    ];
 
     let mut child = Command::new("docker")
         .args(args)
@@ -261,7 +269,12 @@ fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, a
             let error_msg = error_msg.as_str();
             show_error(error_msg, application);
         } else {
-            let error_msg = format!("An error occurred {} {:?} {}", status.code().unwrap(), status, display_variable);
+            let error_msg = format!(
+                "An error occurred {} {:?} {}",
+                status.code().unwrap(),
+                status,
+                display_variable
+            );
             let error_msg = error_msg.as_str();
             show_error(error_msg, application);
         }
@@ -269,20 +282,32 @@ fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, a
 }
 
 #[cfg(target_os = "macos")]
-fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, application: &gtk::Application) {
+fn run_pgmodeler(
+    display_variable: String,
+    user_id: String,
+    user_name: String,
+    application: &gtk::Application,
+) {
     let pgmodeler_version = match var("PGMODELER_VERSION") {
         Ok(ver) => format!("{}", ver),
-        Err(_e) => "v0.9.4-beta1".to_string()
+        Err(_e) => "v0.9.4-beta1".to_string(),
     };
-    let pgmodeler_conf_dir = format!("/Users/{}/.pgmodeler-docker-x11/{}", user_name, pgmodeler_version);
+    let pgmodeler_conf_dir = format!(
+        "/Users/{}/.pgmodeler-docker-x11/{}",
+        user_name, pgmodeler_version
+    );
     let pgmodeler_conf_dir = pgmodeler_conf_dir.as_str();
 
     Command::new("mkdir")
         .arg("-p")
         .arg(pgmodeler_conf_dir)
-        .output().unwrap();
+        .output()
+        .unwrap();
 
-    let pgmodeler_conf = format!("--volume={}:/home/{}/.pgmodeler", pgmodeler_conf_dir, user_name);
+    let pgmodeler_conf = format!(
+        "--volume={}:/home/{}/.pgmodeler",
+        pgmodeler_conf_dir, user_name
+    );
     let pgmodeler_conf = pgmodeler_conf.as_str();
 
     let display_variable = format!("DISPLAY={}:0", display_variable);
@@ -297,12 +322,19 @@ fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, a
     let args = &[
         "run",
         "--rm",
-        "--user", user_id.as_str(),
-        "-e", display_variable, home_volume, "--volume=/etc/group:/etc/group:ro",
-        "--volume=/etc/passwd:/etc/passwd:ro", "--volume=/etc/shadow:/etc/shadow:ro",
-        "--volume=/etc/sudoers.d:/etc/sudoers.d:ro", "--volume=/tmp/.X11-unix:/tmp/.X11-unix",
+        "--user",
+        user_id.as_str(),
+        "-e",
+        display_variable,
+        home_volume,
+        "--volume=/etc/group:/etc/group:ro",
+        "--volume=/etc/passwd:/etc/passwd:ro",
+        "--volume=/etc/shadow:/etc/shadow:ro",
+        "--volume=/etc/sudoers.d:/etc/sudoers.d:ro",
+        "--volume=/tmp/.X11-unix:/tmp/.X11-unix",
         pgmodeler_conf,
-        image_name];
+        image_name,
+    ];
 
     let mut child = Command::new("docker")
         .args(args)
@@ -329,7 +361,12 @@ fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, a
             let error_msg = error_msg.as_str();
             show_error(error_msg, application);
         } else {
-            let error_msg = format!("An error occurred {} {:?} {}", status.code().unwrap(), status, display_variable);
+            let error_msg = format!(
+                "An error occurred {} {:?} {}",
+                status.code().unwrap(),
+                status,
+                display_variable
+            );
             let error_msg = error_msg.as_str();
             show_error(error_msg, application);
         }
@@ -373,13 +410,11 @@ fn build_ui(application: &gtk::Application) {
 }
 
 fn main() {
-    let application = gtk::Application::new(Option::Some(APP_ID),
-                                            Default::default());
+    let application = gtk::Application::new(Option::Some(APP_ID), Default::default());
 
     application.connect_activate(|app| {
         build_ui(app);
     });
 
     application.run_with_args(&args().collect::<Vec<_>>());
-
 }
