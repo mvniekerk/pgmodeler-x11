@@ -39,7 +39,7 @@ fn x11_running(application: &gtk::Application, _ran_already: bool) -> Result<Str
         Ok(output) => {
             let display = String::from_utf8(output.stdout).expect("Could not parse output");
             let display = display.as_str().trim();
-            if display.len() == 0 {
+            if display.is_empty() {
                 Err(())
             } else {
                 Ok(display.to_string())
@@ -133,7 +133,7 @@ fn docker_version() -> Result<String, ()> {
         Ok(output) => {
             let docker_version = String::from_utf8(output.stdout).expect("Could not parse output");
             let docker_version = docker_version.as_str().trim();
-            if docker_version.len() == 0 {
+            if docker_version.is_empty() {
                 Err(())
             } else {
                 Ok(docker_version.to_string())
@@ -171,7 +171,7 @@ fn user_id() -> Result<String, ()> {
         Ok(output) => {
             let user_id = String::from_utf8(output.stdout).expect("Could not parse output");
             let user_id = user_id.as_str().trim();
-            if user_id.len() == 0 {
+            if user_id.is_empty() {
                 Err(())
             } else {
                 Ok(user_id.to_string())
@@ -191,7 +191,7 @@ fn user_name() -> Result<String, ()> {
         Ok(output) => {
             let user_name = String::from_utf8(output.stdout).expect("Could not parse output");
             let user_name = user_name.as_str().trim();
-            if user_name.len() == 0 {
+            if user_name.is_empty() {
                 Err(())
             } else {
                 Ok(user_name.to_string())
@@ -203,7 +203,7 @@ fn user_name() -> Result<String, ()> {
 #[cfg(target_os = "linux")]
 fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, application: &gtk::Application) {
     let pgmodeler_version = match var("PGMODELER_VERSION") {
-        Ok(ver) => format!("{}", ver),
+        Ok(ver) => ver.to_string(),
         Err(_e) => "v0.9.4-beta1".to_string()
     };
     let pgmodeler_conf_dir = format!("/home/{}/.pgmodeler-docker-x11/{}", user_name, pgmodeler_version);
