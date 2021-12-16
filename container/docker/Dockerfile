@@ -7,16 +7,28 @@ ARG PGMODELER_VERSION=v0.9.4-beta1
 ENV PGMODELER_VERSION=$PGMODELER_VERSION
 
 RUN echo "${PGMODELER_VERSION}"
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
-RUN apt-get install -y build-essential checkinstall qt5-default libpq-dev libxml2-dev qttools5-dev-tools clang qt5-image-formats-plugins libqt5svg5 libqt5svg5-dev curl
+RUN apt update
+RUN DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends tzdata
+RUN DEBIAN_FRONTEND=noninteractive apt install -y curl clang checkinstall build-essential
+RUN DEBIAN_FRONTEND=noninteractive apt install -y qt5-default
+RUN DEBIAN_FRONTEND=noninteractive apt install -y libpq-dev pkg-config
+RUN DEBIAN_FRONTEND=noninteractive apt install -y libxml2-dev
+RUN DEBIAN_FRONTEND=noninteractive apt install -y qttools5-dev-tools
+RUN DEBIAN_FRONTEND=noninteractive apt install -y qt5-image-formats-plugins
+RUN DEBIAN_FRONTEND=noninteractive apt install -y libqt5svg5
+RUN DEBIAN_FRONTEND=noninteractive apt install -y libqt5svg5-dev 
+RUN DEBIAN_FRONTEND=noninteractive apt install -y ca-certificates curl software-properties-common unzip
+RUN DEBIAN_FRONTEND=noninteractive apt install -y qttools5-dev 
+
 RUN mkdir /source
 WORKDIR /source
-RUN curl "https://codeload.github.com/pgmodeler/pgmodeler/tar.gz/${PGMODELER_VERSION}" -o pgmodeler-source.tar.gz
+RUN update-ca-certificates
+RUN curl "https://codeload.github.com/pgmodeler/pgmodeler/tar.gz/refs/tags/${PGMODELER_VERSION}" -o pgmodeler-source.tar.gz
 RUN ls /source/; md5sum /source/pgm*
 WORKDIR /source
 RUN tar -xvzf pgmod*; rm pgmodeler-source.tar.gz ; mv pgmo* pgmodeler
 WORKDIR /source/pgmodeler
+RUN curl https://codeload.github.com/pgmodeler/plugins/zip/refs/heads/master -o plugins.zip && unzip ./plugins.zip && rm plugins.zip && mv plugins-master plugins
 COPY linuxdeploy.sh ./
 RUN chmod +x ./linuxdeploy.sh; ./linuxdeploy.sh
 
