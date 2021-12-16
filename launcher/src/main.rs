@@ -9,12 +9,18 @@ use std::process::{Command, Stdio};
 use std::io::{BufReader, BufRead};
 use std::thread;
 
+const APP_ID: &str = "za.co.grindrodbank.pgmodeler-x11";
+
 fn show_error(error: &str, application: &gtk::Application) {
     let error_message = include_str!("error_message.glade");
-    let builder = gtk::Builder::new_from_string(error_message);
+    let builder = gtk::Builder::from_string(error_message);
 
-    let dialog: gtk::MessageDialog = builder.get_object("msgMain").expect("Could not get object");
-    dialog.set_property_text(error);
+    let application = Option::Some(application);
+    let dialog: gtk::MessageDialog = builder.object("msgMain").expect("Could not get object");
+
+    if let Err(err) = dialog.set_property("text", error) {
+        eprintln!("Error {}", err);
+    }
     dialog.set_application(application);
     dialog.run();
 }
@@ -198,7 +204,7 @@ fn user_name() -> Result<String, ()> {
 fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, application: &gtk::Application) {
     let pgmodeler_version = match var("PGMODELER_VERSION") {
         Ok(ver) => format!("{}", ver),
-        Err(_e) => "v0.9.2-beta".to_string()
+        Err(_e) => "v0.9.4-beta1".to_string()
     };
     let pgmodeler_conf_dir = format!("/home/{}/.pgmodeler-docker-x11/{}", user_name, pgmodeler_version);
     let pgmodeler_conf_dir = pgmodeler_conf_dir.as_str();
@@ -266,7 +272,7 @@ fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, a
 fn run_pgmodeler(display_variable: String, user_id: String, user_name: String, application: &gtk::Application) {
     let pgmodeler_version = match var("PGMODELER_VERSION") {
         Ok(ver) => format!("{}", ver),
-        Err(_e) => "v0.9.2-beta".to_string()
+        Err(_e) => "v0.9.4-beta1".to_string()
     };
     let pgmodeler_conf_dir = format!("/Users/{}/.pgmodeler-docker-x11/{}", user_name, pgmodeler_version);
     let pgmodeler_conf_dir = pgmodeler_conf_dir.as_str();
@@ -367,14 +373,13 @@ fn build_ui(application: &gtk::Application) {
 }
 
 fn main() {
-    let application = gtk::Application::new("za.co.grindrodbank.pgmodeler-x11",
-                                            Default::default())
-        .expect("Initialization failed...");
+    let application = gtk::Application::new(Option::Some(APP_ID),
+                                            Default::default());
 
     application.connect_activate(|app| {
         build_ui(app);
     });
 
-    application.run(&args().collect::<Vec<_>>());
+    application.run_with_args(&args().collect::<Vec<_>>());
 
 }
