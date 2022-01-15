@@ -28,7 +28,7 @@ RUN ls /source/; md5sum /source/pgm*
 WORKDIR /source
 RUN tar -xvzf pgmod*; rm pgmodeler-source.tar.gz ; mv pgmo* pgmodeler
 WORKDIR /source/pgmodeler
-RUN curl https://codeload.github.com/pgmodeler/plugins/zip/refs/heads/master -o plugins.zip && unzip ./plugins.zip && rm plugins.zip && mv plugins-master plugins
+RUN curl https://codeload.github.com/pgmodeler/plugins/zip/refs/heads/main -o plugins.zip && unzip ./plugins.zip && rm plugins.zip && mv plugins-main plugins
 COPY linuxdeploy.sh ./
 COPY plugins.pro ./plugins/plugins.pro
 RUN chmod +x ./linuxdeploy.sh; ./linuxdeploy.sh
